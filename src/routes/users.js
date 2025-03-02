@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/users');
+const auth = require('../middleware/auth');
+
 
 // CREATE - Create a new user
 router.post("/", (req, res) => {
@@ -23,7 +25,7 @@ router.post("/", (req, res) => {
 });
 
 // READ (all users)
-router.get("/", (req, res) => {
+router.get("/", auth,(req, res) => {
     User.find({})
         .then(users => {
             res.send(users)

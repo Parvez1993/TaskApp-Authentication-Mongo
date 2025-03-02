@@ -5,10 +5,14 @@ const cors = require("cors");
 const userRouter = require("./routes/users");
 const taskRouter = require("./routes/tasks");
 
+
+
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
+
 app.use(express.json());
 app.use(cors());
 
