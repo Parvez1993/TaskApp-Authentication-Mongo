@@ -53,21 +53,16 @@ taskRouter.delete("/:id", (req, res) => {
 });
 
 // UPDATE a task by ID (PUT method)
-taskRouter.put("/:id", (req, res) => {
-    Task.findByIdAndUpdate(
-        req.params.id,
-        req.body,
-        { new: true, runValidators: true }
-    )
-        .then(task => {
-            if (!task) {
-                return res.status(404).send({ error: "Task not found" });
-            }
-            res.send(task);
-        })
-        .catch(err => {
-            res.status(400).send(err);
-        });
+taskRouter.put("/:id", async (req, res) => {
+    const tasks = await Task.findById(req.params.id)
+    if(!tasks) {
+        return res.status(404).send({ error: "Task not found" });
+    }
+    Object.keys(req.body).forEach(key => {
+        tasks[key] = req.body[key];
+    })
+    await tasks.save()
+    res.send(tasks);
 });
 
 module.exports = taskRouter;
