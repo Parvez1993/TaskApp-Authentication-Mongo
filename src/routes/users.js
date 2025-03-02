@@ -32,6 +32,16 @@ router.get("/", (req, res) => {
     })
 })
 
+router.post("/login", async(req, res) => {
+    try{
+        const user = await User.findByCredentials(req.body.email, req.body.password);
+        res.send(user)
+    }catch(err){
+        res.status(500).send(err)
+    }
+})
+
+
 // READ (single user by ID)
 router.get("/:id", (req, res) => {
     User.findById(req.params.id)
@@ -44,6 +54,8 @@ router.get("/:id", (req, res) => {
         res.status(500).send(err)
     })
 })
+
+
 
 // UPDATE (PUT)
 router.put("/:id", async (req, res) => {
@@ -95,6 +107,8 @@ router.delete("/:id", (req, res) => {
         res.status(500).send(err)
     })
 })
+
+
 
 
 
