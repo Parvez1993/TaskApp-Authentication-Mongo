@@ -1,8 +1,10 @@
 const mongoose = require('mongoose')
 const validator = require('validator')
 const bcrypt = require('bcryptjs'); // Correct import for bcryptjs
-// const jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
+const secret=process.env.JWT_SECRET;
 
+console.log("------>",secret)
 
 const userSchema =new mongoose.Schema({
     name: {
@@ -41,8 +43,30 @@ const userSchema =new mongoose.Schema({
                 throw new Error('Age must be a positive number')
             }
         }
-    }
+    },
+    tokens:[{
+        token:{
+            type:String,
+            required:true
+        }
+    }]
 })
+
+
+userSchema.methods.generateToken = async function() {
+    const user = this;
+    const token = jwt.sign({
+        _id: user._id.toString(),
+        email: user.email,
+    }, secret, {expiresIn: '1d'});
+
+    user.tokens = user.tokens.concat({token})
+    await user.save()
+
+    return token;
+}
+
+
 
 userSchema.statics.findByCredentials=async (email,password)=>{
 
@@ -64,6 +88,8 @@ userSchema.statics.findByCredentials=async (email,password)=>{
 
 }
 
+
+
 userSchema.pre('save', async  function (next) {
     const user = this
     if(user.isModified('password')) {
@@ -71,6 +97,9 @@ userSchema.pre('save', async  function (next) {
     }
     next()
 })
+
+
+
 
 const User = mongoose.model('User', userSchema)
 

@@ -17,7 +17,7 @@ router.post("/", (req, res) => {
                     error: "Email address is already in use. Please use a different email."
                 });
             }
-            // Handle other errors
+            // Handle other
             res.status(400).send(err);
         });
 });
@@ -32,14 +32,6 @@ router.get("/", (req, res) => {
     })
 })
 
-router.post("/login", async(req, res) => {
-    try{
-        const user = await User.findByCredentials(req.body.email, req.body.password);
-        res.send(user)
-    }catch(err){
-        res.status(500).send(err)
-    }
-})
 
 
 // READ (single user by ID)
@@ -55,6 +47,15 @@ router.get("/:id", (req, res) => {
     })
 })
 
+router.post("/login", async(req, res) => {
+    try{
+        const user = await User.findByCredentials(req.body.email, req.body.password);
+        const generatedToken = await user.generateToken();
+        res.send({user:user,token:generatedToken})
+    }catch(err){
+        res.status(500).send(err)
+    }
+})
 
 
 // UPDATE (PUT)
