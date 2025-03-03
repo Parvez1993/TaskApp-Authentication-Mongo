@@ -113,6 +113,41 @@ router.delete("/:id", (req, res) => {
 
 
 
+router.get("/users/me", auth,(req, res) => {
+ res.send(req.user)
+})
 
+
+// Logout current session (removes current token)
+router.post('/logout', auth, async (req, res) => {
+    try {
+        // Filter out the current token from the tokens array
+        req.user.tokens = req.user.tokens.filter((tokenObj) => {
+            return tokenObj.token !== req.user;
+        });
+
+        // Save the user with the updated tokens array
+        await req.user.save();
+
+        res.send({ message: 'Logged out successfully' });
+    } catch (error) {
+        res.status(500).send({ error: 'Logout failed' });
+    }
+});
+
+// Logout from all sessions (removes all tokens)
+router.post('/logoutAll', auth, async (req, res) => {
+    try {
+        // Clear all tokens
+        req.user.tokens = [];
+
+        // Save the user with the empty tokens array
+        await req.user.save();
+
+        res.send({ message: 'Logged out from all devices successfully' });
+    } catch (error) {
+        res.status(500).send({ error: 'Logout failed' });
+    }
+});
 
 module.exports = router;
