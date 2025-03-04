@@ -67,6 +67,14 @@ userSchema.methods.generateToken = async function() {
 }
 
 
+userSchema.methods.getUserProfile= function(){
+    const user = this;
+    const userObject = user.toObject();
+    delete userObject.password;
+    delete userObject.tokens
+    return userObject
+}
+
 
 userSchema.statics.findByCredentials=async (email,password)=>{
 

@@ -53,7 +53,7 @@ router.post("/login", async(req, res) => {
     try{
         const user = await User.findByCredentials(req.body.email, req.body.password);
         const generatedToken = await user.generateToken();
-        res.send({user:user,token:generatedToken})
+        res.send({user:user.getUserProfile(),token:generatedToken})
     }catch(err){
         res.status(500).send(err)
     }
@@ -122,7 +122,7 @@ router.get("/users/me", auth,(req, res) => {
 router.post('/logout', auth, async (req, res) => {
     try {
         // Filter out the current token from the tokens array
-        req.user.tokens = req.user.tokens.filter((tokenObj) => {
+        req.user.tokens = req.user.tokens.filter( (tokenObj) => {
             return tokenObj.token !== req.user;
         });
 
