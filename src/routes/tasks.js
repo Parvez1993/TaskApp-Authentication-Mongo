@@ -1,21 +1,27 @@
 const express = require('express');
 const Task = require('../models/task');
 const taskRouter = express.Router();
+const auth = require('../middleware/auth');
 
 // Create a new task
-taskRouter.post("/", (req, res) => {
-    const task = new Task(req.body);
+taskRouter.post("/", auth, async (req, res) => {
+    try {
+        const task = new Task({
+            ...req.body,
+            owner: req.user._id  // Make sure req.user._id exists
+        });
 
-    task.save().then(data => {
-        res.status(201).send(data)
-    }).catch((err) => {
-        res.status(400).send(err)
-    })
-})
+        await task.save();
+        res.status(201).send(task);
+    } catch (err) {
+        console.error('Task creation error:', err);
+        res.status(400).send(err);
+    }
+});
 
 // Get all tasks
-taskRouter.get("/", (req, res) => {
-    Task.find({})
+taskRouter.get("/",auth, (req, res) => {
+    Task.find({owner:req.user._id})
         .then(tasks => {
             res.send(tasks);
         })
@@ -25,8 +31,8 @@ taskRouter.get("/", (req, res) => {
 });
 
 // Get a specific task by ID
-taskRouter.get("/:id", (req, res) => {
-    Task.findById(req.params.id)
+taskRouter.get("/:id", auth,(req, res) => {
+    Task.findOne({_id:req.params.id, owner:req.user._id})
         .then(task => {
             if (!task) {
                 return res.status(404).send({ error: "Task not found" });
