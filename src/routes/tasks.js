@@ -19,18 +19,24 @@ taskRouter.post("/", auth, async (req, res) => {
     }
 });
 
-// Get all tasks
+// Get all tasks?completed=true&limit=10&skip=1
 taskRouter.get("/", auth, async (req, res) => {
     try {
         const match = {};
 
+
+        //check again Boolean
         if (req.query.completed) {
             match.completed = req.query.completed === 'true';
         }
 
         await req.user.populate({
             path: 'tasks',
-            match: match
+            match: match,
+            options: {
+                skip: req.query.skip,
+                limit: req.query.limit
+            }
         });
 
         res.send(req.user.tasks);
