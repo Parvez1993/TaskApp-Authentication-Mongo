@@ -25,7 +25,7 @@ router.post("/", (req, res) => {
 });
 
 // READ (all users)
-router.get("/", auth,(req, res) => {
+router.get("/", auth, (req, res) => {
     User.find({})
         .then(users => {
             res.send(users)
@@ -35,13 +35,12 @@ router.get("/", auth,(req, res) => {
 })
 
 
-
 // READ (single user by ID)
 router.get("/:id", (req, res) => {
     User.findById(req.params.id)
         .then(user => {
             if (!user) {
-                return res.status(404).send({ error: "User not found" })
+                return res.status(404).send({error: "User not found"})
             }
             res.send(user)
         }).catch(err => {
@@ -49,12 +48,12 @@ router.get("/:id", (req, res) => {
     })
 })
 
-router.post("/login", async(req, res) => {
-    try{
+router.post("/login", async (req, res) => {
+    try {
         const user = await User.findByCredentials(req.body.email, req.body.password);
         const generatedToken = await user.generateToken();
-        res.send({user,token:generatedToken})
-    }catch(err){
+        res.send({user, token: generatedToken})
+    } catch (err) {
         res.status(500).send(err)
     }
 })
@@ -67,7 +66,7 @@ router.put("/:id", async (req, res) => {
         const user = await User.findById(req.params.id);
 
         if (!user) {
-            return res.status(404).send({ error: "User not found" });
+            return res.status(404).send({error: "User not found"});
         }
 
         // Update user properties manually to ensure middleware gets triggered
@@ -84,6 +83,20 @@ router.put("/:id", async (req, res) => {
         res.status(400).send(err);
     }
 });
+
+router.delete("/own", auth, async (req, res) => {
+    try {
+        console.log("aaa",req.user)
+        await req.user.deleteOne();
+        res.send(req.user)
+    } catch (e) {
+        res.status(500).send()
+    }
+})
+
+
+
+
 
 router.delete("/deleteAll", (req, res) => {
     User.deleteMany({})
@@ -103,18 +116,17 @@ router.delete("/:id", (req, res) => {
     User.findByIdAndDelete(req.params.id)
         .then(user => {
             if (!user) {
-                return res.status(404).send({ error: "User not found" })
+                return res.status(404).send({error: "User not found"})
             }
-            res.send({ message: "User deleted successfully", user })
+            res.send({message: "User deleted successfully", user})
         }).catch(err => {
         res.status(500).send(err)
     })
 })
 
 
-
-router.get("/users/me", auth,(req, res) => {
- res.send(req.user)
+router.get("/users/me", auth, (req, res) => {
+    res.send(req.user)
 })
 
 
@@ -122,16 +134,16 @@ router.get("/users/me", auth,(req, res) => {
 router.post('/logout', auth, async (req, res) => {
     try {
         // Filter out the current token from the tokens array
-        req.user.tokens = req.user.tokens.filter( (tokenObj) => {
+        req.user.tokens = req.user.tokens.filter((tokenObj) => {
             return tokenObj.token !== req.user;
         });
 
         // Save the user with the updated tokens array
         await req.user.save();
 
-        res.send({ message: 'Logged out successfully' });
+        res.send({message: 'Logged out successfully'});
     } catch (error) {
-        res.status(500).send({ error: 'Logout failed' });
+        res.status(500).send({error: 'Logout failed'});
     }
 });
 
@@ -144,10 +156,13 @@ router.post('/logoutAll', auth, async (req, res) => {
         // Save the user with the empty tokens array
         await req.user.save();
 
-        res.send({ message: 'Logged out from all devices successfully' });
+        res.send({message: 'Logged out from all devices successfully'});
     } catch (error) {
-        res.status(500).send({ error: 'Logout failed' });
+        res.status(500).send({error: 'Logout failed'});
     }
 });
+
+
+
 
 module.exports = router;
