@@ -35,7 +35,10 @@ taskRouter.get("/", auth, async (req, res) => {
             match: match,
             options: {
                 skip: req.query.skip,
-                limit: req.query.limit
+                limit: req.query.limit,
+                sort:{
+                    createdAt: -1
+                }
             }
         });
 
