@@ -1,18 +1,26 @@
 const mongoose = require('mongoose')
 
-const Task = mongoose.model('Task', {
- description: {
-     type: String,
-     required: true,
-     trim: true
- },
+// Create a schema with the timestamps option
+const taskSchema = new mongoose.Schema({
+    description: {
+        type: String,
+        required: true,
+        trim: true
+    },
     completed: {
         type: Boolean,
         default: false
     },
-    owner:{
-     type:mongoose.Schema.Types.ObjectId, required:true, ref:'User'
+    owner: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: 'User'
     }
+}, {
+    timestamps: true  // This is the correct place for the timestamps option
 })
+
+// Then create the model using the schema
+const Task = mongoose.model('Task', taskSchema)
 
 module.exports = Task
