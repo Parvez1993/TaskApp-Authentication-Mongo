@@ -20,22 +20,32 @@ taskRouter.post("/", auth, async (req, res) => {
 });
 
 // Get all tasks
-taskRouter.get("/",auth, (req, res) => {
-    Task.find({owner:req.user._id})
-        .then(tasks => {
-            res.send(tasks);
-        })
-        .catch(err => {
-            res.status(500).send(err);
+taskRouter.get("/", auth, async (req, res) => {
+    try {
+        const match = {};
+
+        if (req.query.completed) {
+            match.completed = req.query.completed === 'true';
+        }
+
+        await req.user.populate({
+            path: 'tasks',
+            match: match
         });
+
+        res.send(req.user.tasks);
+    } catch (e) {
+        console.error(e);
+        res.status(500).send(e);
+    }
 });
 
 // Get a specific task by ID
-taskRouter.get("/:id", auth,(req, res) => {
-    Task.findOne({_id:req.params.id, owner:req.user._id})
+taskRouter.get("/:id", auth, (req, res) => {
+    Task.findOne({_id: req.params.id, owner: req.user._id})
         .then(task => {
             if (!task) {
-                return res.status(404).send({ error: "Task not found" });
+                return res.status(404).send({error: "Task not found"});
             }
             res.send(task);
         })
@@ -49,9 +59,9 @@ taskRouter.delete("/:id", (req, res) => {
     Task.findByIdAndDelete(req.params.id)
         .then(task => {
             if (!task) {
-                return res.status(404).send({ error: "Task not found" });
+                return res.status(404).send({error: "Task not found"});
             }
-            res.send({ message: "Task deleted successfully", task });
+            res.send({message: "Task deleted successfully", task});
         })
         .catch(err => {
             res.status(500).send(err);
@@ -61,8 +71,8 @@ taskRouter.delete("/:id", (req, res) => {
 // UPDATE a task by ID (PUT method)
 taskRouter.put("/:id", async (req, res) => {
     const tasks = await Task.findById(req.params.id)
-    if(!tasks) {
-        return res.status(404).send({ error: "Task not found" });
+    if (!tasks) {
+        return res.status(404).send({error: "Task not found"});
     }
     Object.keys(req.body).forEach(key => {
         tasks[key] = req.body[key];
