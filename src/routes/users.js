@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/users');
 const auth = require('../middleware/auth');
-
+const multer=require("multer");
 
 // CREATE - Create a new user
 router.post("/", (req, res) => {
@@ -161,6 +161,34 @@ router.post('/logoutAll', auth, async (req, res) => {
         res.status(500).send({error: 'Logout failed'});
     }
 });
+
+
+
+const upload = multer({
+    limits: {
+        fileSize: 1000*1000
+    },
+    fileFilter: (req, file, cb) => {
+        if(!file.originalname.match(/\.(jpg|jpeg|png)$/)){
+            return cb(new Error("Only valid docs and pdf files allowed"));
+        }
+        cb(undefined, true);
+    }
+})
+
+const errorMiddleware = (req, res, next) => {
+    throw new Error('From my middleware')
+}
+
+router.post('/me/avatar', upload.single('uploads'), (req, res)=>{
+    req.user.avatar = req.file.buffer;
+    req.user.save()
+    res.send()
+},(error, req, res,next) => {
+    res.status(400).send({
+        error:error.message
+    })
+})
 
 
 
